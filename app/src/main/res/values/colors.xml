@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <item name="title_bg" type="color">#FF2c5aa9</item>
+    <color name="mp.theme.dark_blue.colorAccent">#DDF9FF</color>
+    <color name="transparent">#00000000</color>
+    <color name="mp.theme.dark_blue.background">#3C5F78</color>
+    <color name="mp.theme.dark_blue.gradientColor">#507E9F</color>
+
+    <color name="alpha_10_black">#1A000000</color>
+    <color name="alpha_20_black">#33000000</color>
+    <color name="main_color">#3F51B5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="red">#FF0000</color>
+    <color name="light_gray">#D6D6D6</color>
+    <color name="silver">#E5E5E5</color>
+    <color name="gray">#808080</color>
+    <color name="dark_gray">#ff424242</color>
+    <color name="green">#008000</color>
+    <color name="blue">#0000FF</color>
+    <color name="navy">#354361</color>
+    <color name="black">#000000</color>
+    <color name="white_pressed">#f1f1f1</color>
+    <color name="app_color">#ff6cb506</color>
+    <color name="status_bar_color">#FF000000</color>
+    <color name="layout_border_color">#FF111111</color>
+    <color name="primary_text_white">#deffffff</color>
+    <color name="green_6a">#FF2c5aa9</color>
+    <integer-array name="gplus_colors">
+        <item>@color/gplus_color_1</item>
+        <item>@color/gplus_color_2</item>
+        <item>@color/gplus_color_3</item>
+        <item>@color/gplus_color_4</item>
+    </integer-array>
+    <color name="text_color_context">#666666</color><!-- 字体颜色  标题灰色 -->
+    <color name="window_gray">#f4f4f4</color>
+    <color name="font_black_2">#616161</color>
+
+
+    <color name="primary_text">#212121</color>
+    <color name="gplus_color_1">#3e802f</color>
+    <color name="gplus_color_2">#f4b400</color>
+    <color name="gplus_color_3">#427fed</color>
+    <color name="gplus_color_4">#b23424</color>
+    <color name="none_received">#999999</color>
+    <color name="start_received">#00FF00</color>
+    <color name="stop_received">#FF0000</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+
+    <color name="progress_left_color">#3F51B5</color>
+    <color name="progress_right_color">#95a5a6</color>
+    <color name="transparentBlack">#6D000000</color>
+
+    <color name="darkgrey">#949494</color>
+    <color name="btn_bg_e">#949494</color>
+    <color name="btn_bg_s">#6D0000</color>
+    <color name="pedo_actionbar_divider">#CECECE</color>
+    <color name="pedo_actionbar_bkg">#F8F8F8</color>
+    <color name="darkBlue">#3e802f</color>
+    <color name="primary">#F44336</color>
+    <color name="accent">#FFC107</color>
+
+    <color name="btn_dialog_negative_normal">#ff0000</color>
+    <color name="btn_dialog_negative_pressed">#bf0000</color>
+    <color name="btn_dialog_positive_normal">#368bff</color>
+    <color name="btn_dialog_positive_pressed">#0067f3</color>
+    <color name="grid" >#3F51B5</color>
+
+</resources>

@@ -1,0 +1,172 @@
+<resources xmlns:xliff="http://schemas.android.com/tools">
+    <string name="app_name">AndroidNote</string>
+    <string name="hello_world">滑动</string>
+
+    <string name="text_bluetooth_off">Bluetooth is Off</string>
+    <string name="text_bluetooth_on">Bluetooth is On</string>
+
+    <string name="text_enable">Enable</string>
+    <string name="text_disable">Disable</string>
+
+    <string name="text_view_paired">Paired Devices</string>
+    <string name="text_scan_devices">Scan Devices</string>
+    <string name="text_stop_scan">Scan Devices</string>
+
+    <string name="text_list_paired_devices">Paired Devices</string>
+    <string name="text_list_devices">List of Devices</string>
+
+    <string name="text_pair">Pair</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="city">城市:</string>
+    <string name="wd">\n风向:</string>
+    <string name="ws">\n风级:</string>
+    <string name="time">\n发布时间:</string>
+
+    <string name="path">下载地址：</string>
+    <string name="button">开始下载</string>
+    <string name="success">下载完成</string>
+    <string name="error">下载出错</string>
+    <string name="stopbutton">暂停下载</string>
+    <string name="sdcarderror">没有SD卡</string>
+    <!-- <string name="fileaddress">http://www.winrar.com.cn/download/wrar380sc.exe</string> -->
+    <string name="fileaddress2">http://abv.cn/music/光辉岁月.mp3</string>
+    <!-- <string name="fileaddress">http://www.winrar.com.cn/download/wrar380sc.exe</string> -->
+    <string name="fileaddress">http://nchc.dl.sourceforge.net/project/sevenzip/7-Zip/9.20/7z920.exe</string>
+
+
+    <string name="clean">"Clean all data"</string>
+    <string name="about">About</string>
+    <string name="delete">Delete</string>
+    <string name="are_you_sure">Are you sure to delete？</string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancle</string>
+    <string name="title">please input the title</string>
+    <string name="content">please input the content</string>
+    <string name="add_picture">Add picture</string>
+    <string name="exit">press again to exit</string>
+    <string name="empty">no notes yet</string>
+
+
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="label_data">Data:</string>
+    <string name="label_device_address">Device address:</string>
+    <string name="label_state">State:</string>
+    <string name="no_data">No data</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="title_devices">BLE Device Scan</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+
+    <!-- Menu items -->
+    <string name="menu_connect">Connect</string>
+    <string name="menu_disconnect">Disconnect</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_stop">Stop</string>
+    <string name="input">input</string>
+    <string name="send">send</string>
+    <string name="scanning">扫描中…</string>
+    <string name="scanning_m_of_n">扫描中 %1$d/%2$d</string>
+
+    <string name="enable_p2p_button">P2P On/Off</string>
+    <string name="discover_peers_button">Discover</string>
+    <string name="connect_peer_button">Connect</string>
+    <string name="disconnect_peer_button">Disconnect</string>
+    <string name="get_file_button">Launch Gallery</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="client_text">This device will act as a client. Click on Gallery button to pick a local(stored) file</string>
+    <string name="empty_message">No devices found. Turn on P2P and perform discovery from the Action Bar</string>
+    <string name="p2p_off_warning">Enable P2P from action bar button above or system settings</string>
+    <string name="group_owner_text">"Am I the Group Owner? "</string>
+    <string name="label_me">ME</string>
+    <string name="label_peers">PEERS</string>
+
+    <string name="btn_start"> Start </string>
+    <string name="btn_stop"> Stop </string>
+    <string name="empty_cache">缓存为空.</string>
+    <string name="cleaned">清理垃圾 (<xliff:g id="memory">%1$s</xliff:g>)</string>
+
+
+    <string name="onstoptask">onStopTask</string>
+    <string name="onstarttask">onStartTask</string>
+    <string name="defaultparamtext">task params will show up here.</string>
+    <string name="schedule_job_button_text">Schedule Job</string>
+    <string name="cancel_all_jobs_button_text">Cancel all</string>
+    <string name="finish_job_button_text">taskFinished</string>
+    <string name="idle_mode_text">Requires device in idle mode.</string>
+    <string name="charging_caption">Charging:</string>
+    <string name="charging_text">Requires device plugged in.</string>
+    <string name="idle_caption">Idle:</string>
+    <string name="constraints">Constraints</string>
+    <string name="connectivity">Connectivity:</string>
+    <string name="any">Any</string>
+    <string name="unmetered">WiFi</string>
+    <string name="timing">Timing:</string>
+    <string name="delay">Delay:</string>
+    <string name="deadline">Deadline:</string>
+    <string-array name="mp_main_titles">
+        <item>@string/mp.fragment.title.play_list</item>
+        <item>@string/mp.fragment.title.music</item>
+        <item>@string/mp.fragment.title.local_files</item>
+        <item>@string/mp.fragment.title.settings</item>
+    </string-array>
+    <string name="mp.fragment.title.play_list">Play List</string>
+    <string name="mp.fragment.title.music">Music</string>
+    <string name="mp.fragment.title.local_files">Local Files</string>
+    <string name="mp.fragment.title.settings">Settings</string>
+
+    <string name="book_title_1">失控</string>
+    <string name="book_description_1">作者: [美] 凯文·凯利 \n副标题: 全人类的最终命运和结局 \n出版年: 2010-12 \n页数: 707 \n定价: 88.00元 </string>
+    <string name="downloaded">&#160;%s %%</string>
+
+    <string name="item_about">about</string>
+    <string name="hide_fragment">Hide Fragment</string>
+    <string name="show_fragment">Show Fragment</string>
+    <item name="tag_async_image_view_position" type="id" />
+    <string name="activity_title">FlipView Demo By Aphid Mobile</string>
+    <string name="cancel_sending_danmakus">发送弹幕</string>
+    <string name="send_danmakus">取消弹幕</string>
+    <string name="start">开始下载</string>
+    <string name="reset">重置</string>
+    <string name="show_error">下载错误</string>
+    <string name="custom_font">cutsom_font</string>
+    <string name="scene">scene1</string>
+    <string name="scene_1">scene2\\</string>
+    <string name="scene_2">scene3</string>
+    <string name="scene_3">scene5</string>
+    <string name="scene_4">scene5</string>
+
+    <string name="text_zoom">Text ZoomButton</string>
+    <string name="text_com">Text Button</string>
+    <string name="share">分享</string>
+
+    <string name="all">全部</string>
+    <string name="setting">设置</string>
+    <string name="fuli">福利</string>
+    <string name="android">Android</string>
+    <string name="ios">iOS</string>
+    <string name="video">休息视频</string>
+    <string name="front">前端</string>
+    <string name="resource">拓展资源</string>
+    <string name="app">App</string>
+    <string name="more">瞎推荐</string>
+
+    <string name="play_sound_auto">开启自动发音</string>
+    <string name="tip_time_interval">提示间隔时间</string>
+    <string name="tip_time_duration">提示显示时间</string>
+    <string name="open_jit_or_nor">开启划词翻译</string>
+    <string name="open_auto_paste">打开 App 自动翻译粘贴板单词</string>
+    <string name="use_recite_or_nor">开启定时单词提醒</string>
+
+    <string name="play_sound_auto_summary">开启后,划词翻译显示结果时会自动播放单词发音。</string>
+    <string name="use_recite_or_nor_summary">开启后,咕咚翻译将会自动的在手机山循环浮动显示已收藏的单词,帮助你更好的记忆这些单词。</string>
+    <string name="notify_dayline_summary">开启后,每天早晨8点,手机会为你提示学习每日一句。</string>
+    <string name="open_auto_paste_summary">开启后,每次打开 App 时将会自动检测粘贴板是否有单词并翻译。</string>
+
+
+</resources>

@@ -1,0 +1,552 @@
+apply plugin: 'com.android.application'
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+apply plugin: 'android-apt'
+apply plugin: 'com.antfortune.freeline'
+apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'tinyPIC'
+apply plugin: 'AndResGuard'
+apply plugin: "build-time-tracker"
+apply plugin: 'com.getkeepsafe.dexcount'
+
+//Groovy 的基本语法
+//方法调用
+//以上语句中的apply是一个方法，给它传递了一个参数plugin，plugin 的值
+//闭包
+//Groovy中花括号包含的部分成为一个闭包（Closure）。例如下面的代码
+//compileOptions 是一个 Method， 它的参数是一个闭包
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+//def gitVersionCode() {
+//    def cmd ='git rev-list HEAD --first-parent --count'
+//    cmd.execute().text.trim().toInteger()
+//}
+
+def gitVersionTag() {
+    def cmd = 'git describe --tags'
+    def version = cmd.execute().text.trim()
+
+    def pattern = "-(\\d+)-g"
+    def matcher = version =~ pattern
+
+    if (matcher) {
+        version = version.substring(0, matcher.start()) + "." + matcher[0][1]
+    } else {
+        version = version + ".0"
+    }
+
+    return version
+}
+
+android {
+    def globalConfiguration = rootProject.ext.android
+    compileSdkVersion globalConfiguration.AndroidCompileSdkVersion
+    buildToolsVersion globalConfiguration.AndroidBuildToolsVersion
+
+
+    defaultConfig {
+        applicationId globalConfiguration.applicationId
+        minSdkVersion globalConfiguration.AndridMinSdkVersion
+        targetSdkVersion globalConfiguration.AndroidTargetSdkVersion
+        multiDexEnabled true
+        resConfigs "zh"
+        versionCode 1
+        versionName gitVersionTag()
+//        versionCode = Integer.parseInt("git rev-list --count HEAD".execute([], project.rootDir).text.trim())
+//        versionName = project.version.toString().replace('+', '-')
+        //ADD THIS LINE:
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+        ndk {
+            moduleName "hello_jni"       //生成的so文件名字，调用C程序的代码中会用到该名字
+//            abiFilters "armeabi", "armeabi-v7a", "x86" //输出指定三种平台下的so库,设置所需要的so库架构
+        }
+
+    }
+
+    //构建类型
+    buildTypes {
+        release {
+
+            // 不显示Log
+            //  buildConfigField "boolean", "LOG_DEBUG", "false"
+            // 混淆
+            minifyEnabled true
+            // Zipalign优化
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources true
+            // 前一部分代表系统默认的android程序的混淆文件，该文件已经包含了基本的混淆声明，后一个文件是自己的定义混淆文件
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            applicationIdSuffix '.release' // 设置release时的包名,设置应用 ID
+//            定义库的私有混淆
+//            consumerProguardFiles 'consumer-proguard-rules.pro'
+//            signingConfig signingConfigs.release
+
+
+        }
+        debug {
+            applicationIdSuffix ".debug"
+        }
+
+    }
+
+    productFlavors {
+        dev {
+            minSdkVersion = 21
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                //这里修改apk文件名
+                def fileName = outputFile.name.replace("app", "${defaultConfig.applicationId}_${defaultConfig.versionName}_${releaseTime()}")
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+
+//关于Android Studio中点9图的编译错误问题
+//    Android Studio内嵌了SDK中的draw9Patch工具，可以直接打开点9图并编辑预览，
+// 只需要将引入的点9图四边黑线按要求补全，然后重新Clean一下
+// Error:Execution failed for task ':app:mergeDebugResources'.
+//    > Some file crunching failed, see logs for details
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+
+    //显示依赖包的存储路径
+    task showMeCache << {
+        configurations.compile.each { println it }
+    }
+
+    //    useLibrary 'org.apache.http.legacy'
+
+
+    lintOptions {
+        disable 'InvalidPackage'
+        abortOnError false
+    }
+//    提示：如果要从增量构建中永久跳过lint检查，可以将其添加到build.gradle中：
+    tasks.whenTaskAdded { task ->
+        if (task.name.equals("lint")) {
+            task.enabled = false
+        }
+    }
+//    不同 Jar 包包含相同文件 （ 路径也相同 ） 的情况还有一种 ，
+//    就是 duplicate files 错误 。 多个 Jar 包包含重复的文件 。
+//    https://stackoverflow.com/questions/31912459/duplicate-lib-file-copied-in-apk-meta-inf-license-txt-error-in-android-studio
+    packagingOptions {
+        // Java的注释冲突
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java', 'src/main/java-gen']
+            res.srcDirs = ['src/main/res/layout/activity',
+                           'src/main/res/layout/fragment',
+                           'src/main/res/'
+            ]
+//            jni.srcDirs = ['src/main/jni', 'src/main/jni/']
+        }
+
+    }
+    //开启gradle的增量编译，加快编译。
+//    使用递增的dex
+//    增加dex的容量.http://stackoverflow.com/questions/25006075/extremely-long-build-with-gradle-android-studio
+    dexOptions {
+        preDexLibraries = false
+        javaMaxHeapSize "4g"
+//        incremental true
+    }
+
+    signingConfigs {
+        debug {
+
+        }
+        release {
+            //storeFile file("../yourapp.jks")
+            //storePassword "your password"
+            //keyAlias "your alias"
+            //keyPassword "your password"
+            //v2SigningEnabled false
+
+//            要让构建流程在您要从命令行调用此构建时提示您输入这些密码：
+//            storePassword System.console().readLine("\nKeystore password: ")
+//            keyPassword System.console().readLine("\nKey password: ")
+
+            //setting your signing.properties
+            //first, add signing.properties to ./app/
+            //second, add property STORE_FILE, STORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD
+        }
+    }
+//    设置java版本
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_7
+//        targetCompatibility JavaVersion.VERSION_1_7
+//
+//    }
+
+}
+buildtimetracker {
+    reporters {
+        csv {
+            output "build/times.csv"
+            append true
+            header false
+        }
+
+        summary {
+            ordered false
+            threshold 50
+            barstyle "unicode"
+        }
+
+        csvSummary {
+            csv "build/times.csv"
+        }
+    }
+}
+dexcount {
+    format = "list"
+    includeClasses = false
+    includeFieldCount = true
+    includeTotalMethodCount = false
+    orderByMethodCount = false
+    verbose = false
+    maxTreeDepth = Integer.MAX_VALUE
+    teamCityIntegration = false
+    enableForInstantRun = false
+    teamCitySlug = null
+    runOnEachAssemble = true
+    maxMethodCount = 64000
+}
+
+
+andResGuard {
+    // mappingFile = file("./resource_mapping.txt")
+    mappingFile = null
+    // 当你使用v2签名的时候，7zip压缩是无法生效的。
+    use7zip = true
+    useSign = true
+    // 打开这个开关，会keep住所有资源的原始路径，只混淆资源的名字
+    keepRoot = false
+    whiteList = [
+            // for your icon
+            "R.drawable.icon",
+            // for fabric
+            "R.string.com.crashlytics.*",
+            // for umeng update
+            "R.string.umeng*",
+            "R.string.UM*",
+            "R.string.tb_*",
+            "R.layout.umeng*",
+            "R.layout.tb_*",
+            "R.drawable.umeng*",
+            "R.drawable.tb_*",
+            "R.anim.umeng*",
+            "R.color.umeng*",
+            "R.color.tb_*",
+            "R.style.*UM*",
+            "R.style.umeng*",
+            "R.id.umeng*",
+            // umeng share for sina
+            "R.drawable.sina*",
+            // for google-services.json
+            "R.string.google_app_id",
+            "R.string.gcm_defaultSenderId",
+            "R.string.default_web_client_id",
+            "R.string.ga_trackingId",
+            "R.string.firebase_database_url",
+            "R.string.google_api_key",
+            "R.string.google_crash_reporting_api_key",
+            // umeng share for facebook
+            "R.layout.*facebook*",
+            "R.id.*facebook*",
+            // umeng share for messager
+            "R.layout.*messager*",
+            "R.id.*messager*",
+            // umeng share commond
+            "R.id.progress_bar_parent",
+            "R.id.webView"
+    ]
+    compressFilePattern = [
+            "*.png",
+            "*.jpg",
+            "*.jpeg",
+            "*.gif",
+            "resources.arsc"
+    ]
+    sevenzip {
+        artifact = 'com.tencent.mm:SevenZip:1.2.1'
+        //path = "/usr/local/bin/7za"
+    }
+}
+tinyinfo {
+    apiKey = 'UOw4TImgfWX6J_HufF24Rimgl8AHjWNK'
+    //是否跳过此task
+    skip = true
+    //是否打印日志
+    isShowLog = false
+}
+//依赖本地arr配置
+repositories {
+    flatDir {
+        dirs 'aars'
+    }
+}
+//http://tech.meituan.com/mt-android-auto-split-dex.html
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('proguard') && (task.name.endsWith('Debug') || task.name.endsWith('Release'))) {
+        task.doLast {
+            makeDexFileAfterProguardJar();
+        }
+        task.doFirst {
+            delete "${project.buildDir}/intermediates/classes-proguard";
+
+            String flavor = task.name.substring('proguard'.length(), task.name.lastIndexOf(task.name.endsWith('Debug') ? "Debug" : "Release"));
+            generateMainIndexKeepList(flavor.toLowerCase());
+        }
+    } else if (task.name.startsWith('zipalign') && (task.name.endsWith('Debug') || task.name.endsWith('Release'))) {
+        task.doFirst {
+            ensureMultiDexInApk();
+        }
+    }
+}
+
+def propFile = project.rootProject.file('signing.properties');
+if (propFile.exists()) {
+    def Properties props = new Properties()
+    props.load(new FileInputStream(propFile))
+    if (props.containsKey('STORE_FILE') && props.containsKey('STORE_PASSWORD') &&
+            props.containsKey('KEY_ALIAS') && props.containsKey('KEY_PASSWORD')) {
+        android.signingConfigs.release.storeFile = file(props['STORE_FILE'])
+        android.signingConfigs.release.storePassword = props['STORE_PASSWORD']
+        android.signingConfigs.release.keyAlias = props['KEY_ALIAS']
+        android.signingConfigs.release.keyPassword = props['KEY_PASSWORD']
+    } else {
+        android.buildTypes.release.signingConfig = null
+    }
+} else {
+    android.buildTypes.release.signingConfig = null
+}
+// The sample build uses multiple directories to
+// keep boilerplate and common code separate from
+// the main sample code.
+List<String> dirs = [
+        'main',     // main sample code; look here for the interesting stuff.
+        'common',   // components that are reused by multiple samples
+        'template'] // boilerplate code that is generated by the sample template process
+
+repositories {
+    jcenter()
+    maven { url "https://github.com/alter-ego/advanced-android-logger/raw/develop/releases/" }
+}
+
+checkstyle {
+    toolVersion = "6.14"
+}
+
+task checkstyle(type: Checkstyle) {
+    configFile file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    source 'src/main/java'
+    include '**/*.java'
+    exclude '**/gen/**'
+    classpath = files()
+}
+//findbugs 分析的是 class 文件，所以就从 classes 配置来找原因。发现 java 和 android 构建后的目录结构是不一样的
+//classes = files("$project.buildDir/intermediates/classes")    -----  android
+//classes = files("$project.buildDir/classes")                            -----  java
+
+task findbugs(type: FindBugs) {
+    ignoreFailures = false
+    effort = "max"
+    reportLevel = "high"
+    excludeFilter = new File("${project.rootDir}/config/quality/findbugs/findbugs-filter.xml")
+    classes = files("${project.rootDir}/app/build/intermediates/classes")
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        xml {
+            destination "$project.buildDir/reports/findbugs/findbugs.xml"
+        }
+        html {
+            destination "$project.buildDir/reports/findbugs/findbugs.html"
+        }
+    }
+
+    classpath = files()
+}
+//Exclude可以设置不编译指定的模块
+
+//configurations {
+//    all*.exclude group: 'org.hamcrest', module: 'hamcrest-core'
+//}
+
+def SUPPORT_VERSION = "25.0.0"
+def aaVersion = '3.3.2';
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    def googleDependencies = rootProject.ext.goodleDependencies
+    def otherDependencies = rootProject.ext.otherDependencies
+    compile googleDependencies.appcompat_v7
+    compile googleDependencies.recyclerview_v7
+    compile googleDependencies.cardview_v7
+    compile googleDependencies.design
+    compile googleDependencies.paletee_v7
+    compile googleDependencies.preference_v7
+
+    compile otherDependencies.butterknife
+    compile otherDependencies.gson
+    compile otherDependencies.retrofit_rxjava
+    compile otherDependencies.retrofit_2_0
+    compile otherDependencies.retrofit_converter_gson
+    compile otherDependencies.picasso
+    compile otherDependencies.glide
+
+    debugCompile otherDependencies.leakcanary_debug
+    releaseCompile otherDependencies.leakcanary_release
+    testCompile otherDependencies.leakcanary_test
+
+    compile otherDependencies.eventbus
+    compile otherDependencies.greendao
+
+    compile otherDependencies.okhttp_logging_interceptor
+    compile otherDependencies.okhttp
+
+    compile otherDependencies.timber
+    compile otherDependencies.hawk
+
+    compile otherDependencies.rxjava
+    compile otherDependencies.rxandroid
+
+    compile otherDependencies.stetho
+    compile otherDependencies.stetho_okhttp
+    // If you want to bind to Android-specific lifecycles
+    compile otherDependencies.rxlifecycle
+    // If you want pre-written Activities and Fragments you can subclass as providers
+    compile otherDependencies.rxlifecycle_components
+    compile otherDependencies.rxbinding
+//    provided
+//    指定 Gradle 不与应用的 APK 一起打包的编译时依赖项。如果运行时无需此依赖项，这将有助于缩减 APK 的大小。
+//    您可以将此配置与 JAR 二进制依赖项一起使用，而不能与其他库模块依赖项或 AAR 二进制依赖项一起使用。
+    provided 'org.projectlombok:lombok:1.16.6'
+
+    android {
+        useLibrary 'org.apache.http.legacy'
+    }
+
+    apt "org.androidannotations:androidannotations:${aaVersion}"
+    compile "org.androidannotations:androidannotations:${aaVersion}"
+
+    compile project(':customview')
+    compile project(':hanshenghttpclient')
+    compile project(':simplenet')
+//    compile project(':animation')
+    //module和aar只能有一个
+//    compile(name: 'animation-release', ext: 'aar')
+    compile 'com.jiechic.library:xUtils:2.6.14'
+
+    compile 'com.getbase:floatingactionbutton:1.7.0'
+
+    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
+
+    compile 'com.eftimoff:android-pathview:1.0.8@aar'
+
+    compile 'com.github.castorflex.smoothprogressbar:library-circular:1.0.0'
+    configurations {
+        all*.exclude module: 'android'
+    }
+    compile 'com.github.ctiao:DanmakuFlameMaster:0.5.0'
+    // Image
+
+    compile 'io.realm:realm-android:0.84.1'
+
+    compile 'com.wanjian:sak:0.0.2'
+
+    // LeanCloud 基础包
+    compile('cn.leancloud.android:avoscloud-sdk:v3.+')
+
+    // LeanCloud 应用内搜索包
+    compile('cn.leancloud.android:avoscloud-search:v3.+@aar')
+
+    compile 'com.melnykov:floatingactionbutton:1.1.0'
+
+    debugCompile 'com.amitshekhar.android:debug-db:0.4.0'
+
+    compile 'com.mikepenz:iconics-core:2.5.5@aar'
+    compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.1@aar'
+    compile 'com.mikepenz:fontawesome-typeface:4.5.0.1@aar'
+    compile 'com.mikepenz:foundation-icons-typeface:3.0.0.1@aar'
+    compile 'com.orhanobut:logger:1.15'
+    compile 'com.github.scribejava:scribejava-apis:3.2.0'
+
+    compile 'com.zhuge.analysis:zhugeio:latest.integration'
+    compile 'com.android.support:multidex:1.0.1'
+
+//    去掉重复依赖,剔除整个组织的库
+//    compile 'com.alibaba.fastjson.latest.integration' {
+//        exclude module: 'annotations', group: 'com.google.android'
+//    }
+//    剔除某个库
+//    compile('com.android.support:appcompat-v7:23.2.0') {
+//        exclude group: 'com.android.support', module: 'support-annotations' // 写全称
+//        exclude group: 'com.android.support', module: 'support-compat'
+//        exclude group: 'com.android.support', module: 'support-v4'
+//        exclude group: 'com.android.support', module: 'support-vector-drawable'
+//    }
+//    compile ('com.facebook.react:react-native:+'){
+//        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+//        exclude group: 'com.android.support', module: 'support-v4'
+//        exclude group: 'com.android.support', module: 'support-v7'
+//    }
+// 对于本地的module也是可以这样处理的：
+
+//    compile(project(':react-native-custom-module')) {
+//        exclude group: 'com.facebook.react', module: 'react-native'
+//    }
+
+//    dependencies {
+//        compile('com.github.BolexLiu:PressScanCode:v1.0.0'', {
+//                exclude group: 'com.google.zxing' //排除依赖
+//    })
+//    compile 'com.google.zxing:core:3.3.0'
+//}
+//
+//这样做的意思排除PressScanCode原有的依赖。而选择依赖我们自己设定的3.3.0的zxing库。
+
+}
+apt {
+    arguments {
+        androidManifestFile variant.outputs[0].processResources.manifestFile
+        // if you have multiple outputs (when using splits), you may want to have other index than 0
+
+        //resourcePackageName 'org.androidannotations.gradle'
+
+        // If you're using Android NBS flavors you should use the following line instead of hard-coded packageName
+        resourcePackageName android.defaultConfig.applicationId
+
+        // You can set optional annotation processing options here, like these commented options:
+        // logLevel 'INFO'
+        // logFile '/var/log/aa.log'
+    }
+}
+
+
+
+
